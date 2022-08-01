@@ -1,0 +1,11 @@
+PASS	Basic Statistics	ET_385_2.fq.gz
+PASS	Per base sequence quality	ET_385_2.fq.gz
+PASS	Per tile sequence quality	ET_385_2.fq.gz
+PASS	Per sequence quality scores	ET_385_2.fq.gz
+PASS	Per base sequence content	ET_385_2.fq.gz
+PASS	Per sequence GC content	ET_385_2.fq.gz
+PASS	Per base N content	ET_385_2.fq.gz
+PASS	Sequence Length Distribution	ET_385_2.fq.gz
+WARN	Sequence Duplication Levels	ET_385_2.fq.gz
+PASS	Overrepresented sequences	ET_385_2.fq.gz
+PASS	Adapter Content	ET_385_2.fq.gz

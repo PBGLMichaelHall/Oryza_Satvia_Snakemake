@@ -1,0 +1,11 @@
+PASS	Basic Statistics	ES_430_1.fq.gz
+PASS	Per base sequence quality	ES_430_1.fq.gz
+FAIL	Per tile sequence quality	ES_430_1.fq.gz
+PASS	Per sequence quality scores	ES_430_1.fq.gz
+PASS	Per base sequence content	ES_430_1.fq.gz
+WARN	Per sequence GC content	ES_430_1.fq.gz
+WARN	Per base N content	ES_430_1.fq.gz
+PASS	Sequence Length Distribution	ES_430_1.fq.gz
+PASS	Sequence Duplication Levels	ES_430_1.fq.gz
+PASS	Overrepresented sequences	ES_430_1.fq.gz
+PASS	Adapter Content	ES_430_1.fq.gz
