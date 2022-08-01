@@ -1,4 +1,5 @@
 # Oryza_Satvia_Snakemake
+```r
 
 #Clone pbgl DNA Proto Workflow
 git clone https://github.com/pbgl/dna-proto-workflow.git
@@ -51,11 +52,16 @@ https://dna-proto-workflow-master.readthedocs.io/en/latest/
 #Test your workflow
 snakemake -npr
 
+```
+
+![Screenshot from 2022-08-01 13-43-14](https://user-images.githubusercontent.com/93121277/182141099-3ec98d0e-cdb1-409e-ba9d-a2b4c0352e55.png)
+
+
 ![dag](https://user-images.githubusercontent.com/93121277/182140684-39e6ba3a-d5cb-4a9d-8021-2a09ccce43f3.svg)
 
-
+```r
 #Run it if everything looks clean!
 snakemake -j 4 -kpr
-
+```
 
 
