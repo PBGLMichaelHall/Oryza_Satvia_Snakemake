@@ -215,9 +215,121 @@
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>snakemake --dag -npr -j <span class="m">1</span> <span class="p">|</span> dot -Tsvg &gt; dag.svg
 </pre></div>
 </div>
-<img alt="_images/dag.svg" src="_images/dag.svg" /><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>snakemake -j <span class="m">4</span> -kpr
+<a class="reference internal image-reference" href="_images/dag.svg"><img alt="Directed Acrylic Graph" height="35800" src="_images/dag.svg" width="421280" /></a>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>snakemake -j <span class="m">4</span> -kpr
+
+<span class="c1">#After PBGL Dna prototype pipeline root directory contains 634 items amounting to 271.4 Gigabytes</span>
+<span class="c1">#There should be a vcf file in output variants final, lets take a look!</span>
+
+bcftools view /home/michael/dna-proto-workflow/output/variants/final/freebayes~bwa~GCF_001433935.1_IRGSP-1.0~all_samples~filtered-strict.vcf.gz <span class="p">|</span> less -S
+
+<span class="c1">#Filter variants for biallelic sites only and SNPS types</span>
+
+bcftools view -m2 -M2 -v snps -o freebayes~bwa~GCF_001433935.1_IRGSP-1.0~all_samples~filtered-strict.Biallelic.vcf.gz freebayes~bwa~GCF_001433935.1_IRGSP-1.0~all_samples~filtered-strict.vcf.gz
+
+<span class="c1">#Follow pbgl online documentation</span>
+
+https://github.com/pbgl/QTLseqr
+
+
+conda deactivate dna-proto
+
+
+<span class="c1">#Create and activate new R Environment</span>
+
+mamba env create --file env/R.yaml
+
+
+<span class="c1">#Set samples</span>
+HighBulk &lt;- <span class="s2">&quot;ET_385&quot;</span> <span class="c1"># SRA-run: SRR834931</span>
+LowBulk &lt;- <span class="s2">&quot;ES_430&quot;</span> <span class="c1"># SRA-run: SRR834927</span>
+
+<span class="c1">#set file name of the VCF file to load</span>
+file &lt;- <span class="s2">&quot;freebayes~bwa~GCF_001433935.1_IRGSP-1.0~all_samples~filtered-strict~snpEff.Biallelic.vcf.gz&quot;</span>
+
+<span class="c1">#Specify which chromosomes should be included in the analysis (i.e., exclude smaller contigs)</span>
+Chroms &lt;- c<span class="o">(</span><span class="s2">&quot;NC_029256.1&quot;</span>,
+<span class="s2">&quot;NC_029257.1&quot;</span>,
+<span class="s2">&quot;NC_029258.1&quot;</span>,
+<span class="s2">&quot;NC_029259.1&quot;</span>,
+<span class="s2">&quot;NC_029260.1&quot;</span>,
+<span class="s2">&quot;NC_029261.1&quot;</span>,
+<span class="s2">&quot;NC_029262.1&quot;</span>,
+<span class="s2">&quot;NC_029263.1&quot;</span>,
+<span class="s2">&quot;NC_029264.1&quot;</span>,
+<span class="s2">&quot;NC_029265.1&quot;</span>,
+<span class="s2">&quot;NC_029266.1&quot;</span>,
+<span class="s2">&quot;NC_029267.1&quot;</span><span class="o">)</span>
+df &lt;-
+importFromVCF<span class="o">(</span>
+<span class="nv">file</span> <span class="o">=</span> file,
+<span class="nv">highBulk</span> <span class="o">=</span> HighBulk,
+<span class="nv">lowBulk</span> <span class="o">=</span> LowBulk,
+<span class="nv">chromList</span> <span class="o">=</span> Chroms
+<span class="o">)</span>
+
+
+df_filt &lt;-
+filterSNPs<span class="o">(</span>
+<span class="nv">SNPset</span> <span class="o">=</span> df,
+<span class="nv">refAlleleFreq</span> <span class="o">=</span> <span class="m">0</span>.20,
+<span class="nv">minTotalDepth</span> <span class="o">=</span> <span class="m">70</span>,
+<span class="nv">maxTotalDepth</span> <span class="o">=</span> <span class="m">200</span>,
+<span class="nv">minSampleDepth</span> <span class="o">=</span> <span class="m">30</span>,
+<span class="nv">depthDifference</span> <span class="o">=</span> <span class="m">100</span>,
+<span class="c1">#minGQ = 150,</span>
+<span class="nv">verbose</span> <span class="o">=</span> TRUE
+<span class="o">)</span>
+
+df_filt &lt;-
+runGprimeAnalysis<span class="o">(</span>
+<span class="nv">SNPset</span> <span class="o">=</span> df_filt,
+<span class="nv">windowSize</span> <span class="o">=</span> 1e6,
+<span class="nv">outlierFilter</span> <span class="o">=</span> <span class="s2">&quot;deltaSNP&quot;</span>,
+<span class="nv">filterThreshold</span> <span class="o">=</span> <span class="m">0</span>.1
+<span class="o">)</span>
+
+df_filt &lt;-
+runQTLseqAnalysis<span class="o">(</span>
+<span class="nv">SNPset</span> <span class="o">=</span> df_filt,
+<span class="nv">windowSize</span> <span class="o">=</span> 1e6,
+<span class="nv">popStruc</span> <span class="o">=</span> <span class="s2">&quot;F2&quot;</span>,
+<span class="nv">bulkSize</span> <span class="o">=</span> c<span class="o">(</span><span class="m">385</span>, <span class="m">430</span><span class="o">)</span>,
+<span class="nv">replications</span> <span class="o">=</span> <span class="m">10000</span>,
+<span class="nv">intervals</span> <span class="o">=</span> c<span class="o">(</span><span class="m">95</span>, <span class="m">99</span><span class="o">)</span>
+<span class="o">)</span>
+
+plotQTLStats<span class="o">(</span><span class="nv">SNPset</span> <span class="o">=</span> df_filt, <span class="nv">var</span> <span class="o">=</span> <span class="s2">&quot;nSNPs&quot;</span>, <span class="nv">plotIntervals</span> <span class="o">=</span> TRUE<span class="o">)</span>
 </pre></div>
 </div>
+<figure class="align-default">
+<img alt="_images/nsnps.png" src="_images/nsnps.png" />
+</figure>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>plotQTLStats<span class="o">(</span><span class="nv">SNPset</span> <span class="o">=</span> df_filt, <span class="nv">var</span> <span class="o">=</span> <span class="s2">&quot;deltaSNP&quot;</span>, <span class="nv">plotIntervals</span> <span class="o">=</span> TRUE<span class="o">)</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="_images/delta.png" src="_images/delta.png" />
+</figure>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>plotQTLStats<span class="o">(</span><span class="nv">SNPset</span> <span class="o">=</span> df_filt, <span class="nv">var</span> <span class="o">=</span> <span class="s2">&quot;Gprime&quot;</span>, <span class="nv">plotThreshold</span> <span class="o">=</span> TRUE, <span class="nv">q</span> <span class="o">=</span> <span class="m">0</span>.02<span class="o">)</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="_images/Gprime.png" src="_images/Gprime.png" />
+</figure>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>df_filt<span class="nv">$p1</span> &lt;- df_filt<span class="nv">$AD_ALT</span>.LOW/df_filt<span class="nv">$DP</span>.LOW
+df_filt<span class="nv">$p2</span> &lt;- df_filt<span class="nv">$AD_ALT</span>.HIGH/df_filt<span class="nv">$DP</span>.HIGH
+df_filt3 &lt;- df_filt %&gt;% dplyr::filter<span class="o">(</span><span class="nv">CHROM</span><span class="o">==</span><span class="s2">&quot;NC_029263.1&quot;</span><span class="o">)</span>
+<span class="c1">#Perhaps my filter is biased, but here it is. I want observed variants with pvalues below a significant threshold.</span>
+df_filt4 &lt;- df_filt3 %&gt;% dplyr::filter<span class="o">(</span>pvalue &lt; .0000962<span class="o">)</span>
+write.csv<span class="o">(</span>df_filt3,file <span class="o">=</span> <span class="s2">&quot;QTL.csv&quot;</span>,sep<span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+<img alt="_images/pvalue.png" src="_images/pvalue.png" />
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bash IGV.sh
+</pre></div>
+</div>
+<a class="reference external image-reference" href="../images/IGV.png"><img alt="Integrated Genomic Viewer" src="_images/IGV.png" /></a>
 </section>
 </section>
 
