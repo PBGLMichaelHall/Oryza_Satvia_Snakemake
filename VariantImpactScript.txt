@@ -1,0 +1,35 @@
+Download:
+SNPEff.latest
+https://pcingola.github.io/SnpEff/download/
+
+cd snpEff
+
+cat freebayes~bwa~GCF_001433935.1_IRGSP-1.0~all_samples~filtered-strict~snpEff.vcf | scripts/vcfAnnFirst.py | java -jar SnpSift.jar extractFields - CHROM POS ID REF ALT QUAL FILTER "ANN[*].IMPACT" FORMAT ES_430 ET_385 > impact.tsv
+
+#Import Data into R
+
+All_HIGH_IMPACT <- impact %>% dplyr::filter(ANN....IMPACT == "HIGH")
+write.csv(All_HIGH_IMPACT,file="All_High_Impact.",sep = "/t")
+write.table(All_HIGH_IMPACT,file = "All_High_Impact.tsv",sep = "\t",col.names = FALSE)
+
+#Make a VCF header
+
+bcftools view -h freebayes~bwa~GCF_001433935.1_IRGSP-1.0~all_samples~filtered-strict~snpEff.vcf > header.txt
+
+#Concatenate All_HIGH_IMPACT and remove first column
+
+cat All_High_Impact.tsv | cut -f2,3,4,5,6,7,8,9,10,11,12 > All_HHH_IMPACT.tsv
+
+#Remove all quotes
+
+sed 's/\"//g' All_High_Impact.tsv > All_All_HHH_Impact.tsv
+
+#Concatentate All_All_HHH_Impact.tsv with header.txt to remake VCF file
+
+cat header.txt All_All_HHH_IMPACT.tsv > MegaMan.vcf
+
+#Run bcftools and view it
+
+bcftools view Mega.vcf.gz | less -S
+
+
