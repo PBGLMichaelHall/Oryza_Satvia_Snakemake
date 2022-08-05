@@ -348,6 +348,7 @@ HIGH IMPACT VARIANTS in QTL Region
 Copy Number Variants
 ===================
 
+.. code:: shell
 
 	#Following protocol from 
 	https://github.com/PBGLMichaelHall/CNVseq
@@ -368,4 +369,4 @@ Copy Number Variants
 	library(CNV)
 	CNV::CNV(file = "100Kbin.txt", Chromosome = c("NC_029256.1","NC_029257.1","NC_029258.1","NC_029259.1","NC_029260.1","NC_029261.1","NC_029262.1","NC_029263.1","NC_029264.1","NC_029265.1","NC_029266.1","NC_029267.1"),mutantname="ET385.ES430",controlname="ES430.ES430",size=.75,alpha=.25,color="green")
 
-	.. image:: ../images/CNVOryzaSatvia.png
+.. image:: ../images/CNVOryzaSatvia.png

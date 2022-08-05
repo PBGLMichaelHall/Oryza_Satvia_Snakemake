@@ -379,23 +379,24 @@ cat freebayes~bwa~GCF_001433935.1_IRGSP-1.0~all_samples~filtered-strict~snpEff.v
 <span class="c1">#Import Data into R</span>
 
 All_HIGH_IMPACT &lt;- impact %&gt;% dplyr::filter<span class="o">(</span>ANN....IMPACT <span class="o">==</span> <span class="s2">&quot;HIGH&quot;</span><span class="o">)</span>
-df_filt &lt;- All_HIGH_IMPACT  %&gt;% dplyr::filter<span class="o">(</span><span class="nv">CHROM</span><span class="o">==</span><span class="s2">&quot;NC_029263.1&quot;</span><span class="o">)</span>
+df_filt2 &lt;- All_HIGH_IMPACT  %&gt;% dplyr::filter<span class="o">(</span><span class="nv">CHROM</span><span class="o">==</span><span class="s2">&quot;NC_029263.1&quot;</span><span class="o">)</span>
 <span class="c1">#QTL 1 Region on Chromosome 8 from QTL.csv file</span>
-df_filt &lt;- df_filt %&gt;% dplyr::filter<span class="o">(</span>POS &gt;<span class="o">=</span> <span class="m">17944918</span> <span class="p">&amp;</span> POS &lt;<span class="o">=</span> <span class="m">25698533</span><span class="o">)</span>
-write.csv<span class="o">(</span>All_HIGH_IMPACT,file<span class="o">=</span><span class="s2">&quot;All_High_Impact.&quot;</span>,sep <span class="o">=</span> <span class="s2">&quot;/t&quot;</span><span class="o">)</span>
-write.table<span class="o">(</span>All_HIGH_IMPACT,file <span class="o">=</span> <span class="s2">&quot;All_High_Impact.txt&quot;</span>,col.names <span class="o">=</span> FALSE<span class="o">)</span>
+df_filt2 &lt;- df_filt2 %&gt;% dplyr::filter<span class="o">(</span>POS &gt;<span class="o">=</span> <span class="m">17944918</span> <span class="p">&amp;</span> POS &lt;<span class="o">=</span> <span class="m">25698533</span><span class="o">)</span>
+df_filt2 &lt;- df_filt2 %&gt;% dplyr::select<span class="o">(</span>POS<span class="o">)</span>
+write.table<span class="o">(</span>df_filt2,file<span class="o">=</span><span class="s2">&quot;All_High_Impact.txt&quot;</span>,row.names<span class="o">=</span>FALSE,col.names<span class="o">=</span>FALSE<span class="o">)</span>
+
 
 <span class="c1">#We know from QTL.csv Chromosome 6 &quot;NC_029263.1&quot; has a QTL peak in the range of positions 17944918 - 25698533!</span>
-<span class="c1">#Filter original SNP set to include this range of positions</span>
+<span class="c1">#Filter original SNP set to include this range of positions on Chromosome 8</span>
 
-df_filt3 &lt;- df_filt %&gt;% dplyr::filter<span class="o">(</span><span class="nv">CHROM</span><span class="o">==</span><span class="s2">&quot;NC_029263.1&quot;</span><span class="o">)</span>
+df_filt &lt;- df_filt %&gt;% dplyr::filter<span class="o">(</span><span class="nv">CHROM</span><span class="o">==</span><span class="s2">&quot;NC_029263.1&quot;</span><span class="o">)</span>
 
 <span class="c1">#QTL1 Region</span>
-df_filt4 &lt;- df_filt3 %&gt;% dplyr::filter<span class="o">(</span>POS &gt;<span class="o">=</span> <span class="m">17944918</span> <span class="p">&amp;</span> POS &lt;<span class="o">=</span> <span class="m">25698533</span><span class="o">)</span>
+df_filt &lt;- df_filt %&gt;% dplyr::filter<span class="o">(</span>POS &gt;<span class="o">=</span> <span class="m">17944918</span> <span class="p">&amp;</span> POS &lt;<span class="o">=</span> <span class="m">25698533</span><span class="o">)</span>
 <span class="c1">#Significant SNP</span>
-df_filt4 &lt;- df_filt4 %&gt;% dplyr::filter<span class="o">(</span>pvalue &lt; .05<span class="o">)</span>
+df_filt &lt;- df_filt %&gt;% dplyr::filter<span class="o">(</span>pvalue &lt; .05<span class="o">)</span>
 <span class="c1">#Write a text file</span>
-write.table<span class="o">(</span>df_filt4, <span class="nv">file</span> <span class="o">=</span> <span class="s2">&quot;POSQTL1.txt&quot;</span>,col.names <span class="o">=</span> FALSE<span class="o">)</span>
+write.table<span class="o">(</span>df_filt, <span class="nv">file</span> <span class="o">=</span> <span class="s2">&quot;POSQTL1.txt&quot;</span>,col.names <span class="o">=</span> FALSE<span class="o">)</span>
 
 <span class="c1">#Use MatchList.py script to find Variants that are</span>
 nano MatchList.py
@@ -413,7 +414,7 @@ with open<span class="o">(</span><span class="s2">&quot;POSQTL1.txt&quot;</span>
 <span class="k">for</span> line <span class="k">in</span> file:
 list1.append<span class="o">(</span>line.strip<span class="o">())</span>
 <span class="c1">#print(list1)</span>
-with open<span class="o">(</span><span class="s2">&quot;HighImpactQTL1.txt&quot;</span><span class="o">)</span> as file:
+with open<span class="o">(</span><span class="s2">&quot;All_High_Impact.txt&quot;</span><span class="o">)</span> as file:
 <span class="nv">list2</span> <span class="o">=</span> <span class="o">[]</span>
 <span class="k">for</span> line <span class="k">in</span> file:
 list2.append<span class="o">(</span>line.strip<span class="o">())</span>
@@ -437,26 +438,49 @@ list2.append<span class="o">(</span>line.strip<span class="o">())</span>
 print<span class="o">(</span>df9<span class="o">)</span>
 <span class="c1">#print(df9[&#39;[0]&#39;])</span>
 
-<span class="c1">#Upload the document into R and filter results in decending order as seen in *orderedVariants.txt&quot;</span>
+python MatchList.py
+
+<span class="m">18398803</span>
+<span class="m">18519533</span>
+<span class="m">18593921</span>
+<span class="m">19148067</span>
+<span class="m">19715648</span>
+<span class="m">21045530</span>
+<span class="m">21093745</span>
+<span class="m">22286217</span>
+<span class="m">22636828</span>
+<span class="m">23063312</span>
+<span class="m">23591197</span>
+<span class="m">24582019</span>
+<span class="m">24753987</span>
+<span class="m">24772963</span>
+<span class="m">24775242</span>
+<span class="m">24775287</span>
+<span class="m">24785765</span>
+<span class="m">24854393</span>
 </pre></div>
 </div>
-<blockquote>
-<div><p>#Following protocol from
-<a class="reference external" href="https://github.com/PBGLMichaelHall/CNVseq">https://github.com/PBGLMichaelHall/CNVseq</a>
-#Remove duplicates from original NCBI fastq foward and reverse Illumina Runs
-bash clumpify.sh in=../../../dna-proto-workflow/FASTQ/ES_430_1.fq.gz in2=../../../dna-proto-workflow/FASTQ/ES_430_2.fq.gz out=ES_430.R1.dedup.fq.gz out2=ES_430.R2.dedup.fq.gz dedupe=t -Xmx4096m
-bash clumpify.sh in=../../../dna-proto-workflow/FASTQ/ET_385_1.fq.gz in2=../../../dna-proto-workflow/FASTQ/ET_385_2.fq.gz out=ET_385.R1.dedup.fq.gz out2=ET_385.R2.dedup.fq.gz dedupe=t -Xmx4096m</p>
-<p>bwa mem -M -t 3 -R <a class="reference external" href="mailto:'&#37;&#52;&#48;RGtID">‘<span>&#64;</span>RGtID</a>:ES430 tSM: ES430’ ../../dna-proto-workflow/genomes_and_annotations/GCF_001433935.1_IRGSP-1.0/GCF_001433935.1_IRGSP-1.0_genomic.fna ES_430.R1.dedup.fq.gz ES_430.R2.dedup.fq.gz &gt; ES430.dedup.sam
-bwa mem -M -t 3 -R <a class="reference external" href="mailto:'&#37;&#52;&#48;RGtID">‘<span>&#64;</span>RGtID</a>:ET385 tSM: ET385’ ../../dna-proto-workflow/genomes_and_annotations/GCF_001433935.1_IRGSP-1.0/GCF_001433935.1_IRGSP-1.0_genomic.fna ET_385.R1.dedup.fq.gz ET_385.R2.dedup.fq.gz &gt; ET385.dedup.sam</p>
-<p>samtools sort -O sam -T sam -T ES430.sort -o ES430_aln.sam ES430.dedup.sam
-samtools sort -O sam -T sam -T ET385.sort -o ET385_aln.sam ET385.dedup.sam</p>
-<p>python bin-by-sam_2.0.py -o 100Kbin.txt -s 100000 -b -p 2 -c ES430_aln.sam</p>
-<p>#Open an R-Studio Session
-devtools::install_github(repo=”PBGLMichaelHall/CNVseq”,force=TRUE)
-library(CNV)
-CNV::CNV(file = “100Kbin.txt”, Chromosome = c(“NC_029256.1”,”NC_029257.1”,”NC_029258.1”,”NC_029259.1”,”NC_029260.1”,”NC_029261.1”,”NC_029262.1”,”NC_029263.1”,”NC_029264.1”,”NC_029265.1”,”NC_029266.1”,”NC_029267.1”),mutantname=”ET385.ES430”,controlname=”ES430.ES430”,size=.75,alpha=.25,color=”green”)</p>
-<img alt="../images/CNVOryzaSatvia.png" src="../images/CNVOryzaSatvia.png" />
-</div></blockquote>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1">#Following protocol from</span>
+https://github.com/PBGLMichaelHall/CNVseq
+<span class="c1">#Remove duplicates from original NCBI fastq foward and reverse Illumina Runs</span>
+bash clumpify.sh <span class="k">in</span><span class="o">=</span>../../../dna-proto-workflow/FASTQ/ES_430_1.fq.gz <span class="nv">in2</span><span class="o">=</span>../../../dna-proto-workflow/FASTQ/ES_430_2.fq.gz <span class="nv">out</span><span class="o">=</span>ES_430.R1.dedup.fq.gz <span class="nv">out2</span><span class="o">=</span>ES_430.R2.dedup.fq.gz <span class="nv">dedupe</span><span class="o">=</span>t -Xmx4096m
+bash clumpify.sh <span class="k">in</span><span class="o">=</span>../../../dna-proto-workflow/FASTQ/ET_385_1.fq.gz <span class="nv">in2</span><span class="o">=</span>../../../dna-proto-workflow/FASTQ/ET_385_2.fq.gz <span class="nv">out</span><span class="o">=</span>ET_385.R1.dedup.fq.gz <span class="nv">out2</span><span class="o">=</span>ET_385.R2.dedup.fq.gz <span class="nv">dedupe</span><span class="o">=</span>t -Xmx4096m
+
+bwa mem -M -t <span class="m">3</span> -R <span class="s1">&#39;@RG\tID:ES430 \tSM: ES430&#39;</span> ../../dna-proto-workflow/genomes_and_annotations/GCF_001433935.1_IRGSP-1.0/GCF_001433935.1_IRGSP-1.0_genomic.fna ES_430.R1.dedup.fq.gz ES_430.R2.dedup.fq.gz &gt; ES430.dedup.sam
+bwa mem -M -t <span class="m">3</span> -R <span class="s1">&#39;@RG\tID:ET385 \tSM: ET385&#39;</span> ../../dna-proto-workflow/genomes_and_annotations/GCF_001433935.1_IRGSP-1.0/GCF_001433935.1_IRGSP-1.0_genomic.fna ET_385.R1.dedup.fq.gz ET_385.R2.dedup.fq.gz &gt; ET385.dedup.sam
+
+samtools sort -O sam -T sam -T ES430.sort -o ES430_aln.sam ES430.dedup.sam
+samtools sort -O sam -T sam -T ET385.sort -o ET385_aln.sam ET385.dedup.sam
+
+python bin-by-sam_2.0.py -o 100Kbin.txt -s <span class="m">100000</span> -b -p <span class="m">2</span> -c ES430_aln.sam
+
+<span class="c1">#Open an R-Studio Session</span>
+devtools::install_github<span class="o">(</span><span class="nv">repo</span><span class="o">=</span><span class="s2">&quot;PBGLMichaelHall/CNVseq&quot;</span>,force<span class="o">=</span>TRUE<span class="o">)</span>
+library<span class="o">(</span>CNV<span class="o">)</span>
+CNV::CNV<span class="o">(</span><span class="nv">file</span> <span class="o">=</span> <span class="s2">&quot;100Kbin.txt&quot;</span>, <span class="nv">Chromosome</span> <span class="o">=</span> c<span class="o">(</span><span class="s2">&quot;NC_029256.1&quot;</span>,<span class="s2">&quot;NC_029257.1&quot;</span>,<span class="s2">&quot;NC_029258.1&quot;</span>,<span class="s2">&quot;NC_029259.1&quot;</span>,<span class="s2">&quot;NC_029260.1&quot;</span>,<span class="s2">&quot;NC_029261.1&quot;</span>,<span class="s2">&quot;NC_029262.1&quot;</span>,<span class="s2">&quot;NC_029263.1&quot;</span>,<span class="s2">&quot;NC_029264.1&quot;</span>,<span class="s2">&quot;NC_029265.1&quot;</span>,<span class="s2">&quot;NC_029266.1&quot;</span>,<span class="s2">&quot;NC_029267.1&quot;</span><span class="o">)</span>,mutantname<span class="o">=</span><span class="s2">&quot;ET385.ES430&quot;</span>,controlname<span class="o">=</span><span class="s2">&quot;ES430.ES430&quot;</span>,size<span class="o">=</span>.75,alpha<span class="o">=</span>.25,color<span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+<img alt="_images/CNVOryzaSatvia.png" src="_images/CNVOryzaSatvia.png" />
 </section>
 </section>
 
