@@ -322,4 +322,28 @@ HIGH IMPACT VARIANTS in QTL Region
 	#Upload the document into R and filter results in decending order as seen in *orderedVariants.txt"
 
 
+====================
+Copy Number Variants
+===================
 
+
+	#Following protocol from 
+	https://github.com/PBGLMichaelHall/CNVseq
+	#Remove duplicates from original NCBI fastq foward and reverse Illumina Runs
+	bash clumpify.sh in=../../../dna-proto-workflow/FASTQ/ES_430_1.fq.gz in2=../../../dna-proto-workflow/FASTQ/ES_430_2.fq.gz out=ES_430.R1.dedup.fq.gz out2=ES_430.R2.dedup.fq.gz dedupe=t -Xmx4096m
+	bash clumpify.sh in=../../../dna-proto-workflow/FASTQ/ET_385_1.fq.gz in2=../../../dna-proto-workflow/FASTQ/ET_385_2.fq.gz out=ET_385.R1.dedup.fq.gz out2=ET_385.R2.dedup.fq.gz dedupe=t -Xmx4096m
+
+	bwa mem -M -t 3 -R '@RG\tID:ES430 \tSM: ES430' ../../dna-proto-workflow/genomes_and_annotations/GCF_001433935.1_IRGSP-1.0/GCF_001433935.1_IRGSP-1.0_genomic.fna ES_430.R1.dedup.fq.gz ES_430.R2.dedup.fq.gz > ES430.dedup.sam
+	bwa mem -M -t 3 -R '@RG\tID:ET385 \tSM: ET385' ../../dna-proto-workflow/genomes_and_annotations/GCF_001433935.1_IRGSP-1.0/GCF_001433935.1_IRGSP-1.0_genomic.fna ET_385.R1.dedup.fq.gz ET_385.R2.dedup.fq.gz > ET385.dedup.sam
+	
+	samtools sort -O sam -T sam -T ES430.sort -o ES430_aln.sam ES430.dedup.sam 
+	samtools sort -O sam -T sam -T ET385.sort -o ET385_aln.sam ET385.dedup.sam
+
+	python bin-by-sam_2.0.py -o 100Kbin.txt -s 100000 -b -p 2 -c ES430_aln.sam
+
+	#Open an R-Studio Session
+	devtools::install_github(repo="PBGLMichaelHall/CNVseq",force=TRUE)
+	library(CNV)
+	CNV::CNV(file = "100Kbin.txt", Chromosome = c("NC_029256.1","NC_029257.1","NC_029258.1","NC_029259.1","NC_029260.1","NC_029261.1","NC_029262.1","NC_029263.1","NC_029264.1","NC_029265.1","NC_029266.1","NC_029267.1"),mutantname="ET385.ES430",controlname="ES430.ES430",size=.75,alpha=.25,color="green")
+
+	.. image:: ../images/CNVOryzaSatvia.png
