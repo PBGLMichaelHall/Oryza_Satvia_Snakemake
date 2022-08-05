@@ -198,9 +198,6 @@ Software Prerequisites
 
 .. image:: ../images/pvalue.png
 
-.. csv-table:: Significant Variants
-   :url: https://github.com/PBGLMichaelHall/Oryza_Satvia_Snakemake/blob/main/QTL.csv
-
 
 	#Now, we open up Integrative Genomic Viewer to further analyze the most significant variant called to validate information.
 
@@ -211,3 +208,118 @@ Software Prerequisites
 .. image:: ../images/IGV.png
    :target: ../images/IGV.png
    :alt: Integrated Genomic Viewer
+
+Painting The Chromosomes Green
+==============================
+
+.. code:: shell
+   
+	# Clone VCF Hunter from github
+	git clone https://github.com/SouthGreenPlatform/VcfHunter.git
+	cd VcfHunter
+
+	# Use vcf from Snakemake workflow as in input file to Filter it according to python script vcfFilter.1.0.py
+	python vcfFilter.1.0.py --vcf freebayes~bwa~GCF_001433935.1_IRGSP-1.0~all_samples~filtered-strict~snpEff.vcf.gz --names Oryza_Satvia_Snakemake/PaintTheChromosomes/all_names.tab  --MinCov 10 --MaxCov 300 --MinAl 3 --nMiss 1 --RmAlAlt 1:3:4:5:6 --prefix DNAseq_Filtered -g y
+
+	#Use vcftools to split vcf into independent vcf files per chromosome
+	vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029256.1 --recode --out data/Chr01_DNAseq_Filtered.vcf.gz
+	vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029256.1 --recode --out data/Chr01_DNAseq_Filtered.vcf.gz
+	vcftools --gzvcf Downloads/VcfHunter/bin/DNAseq_Filtered_filt.vcf.gz --chr NC_029257.1 --recode --out data/Chr02_DNAseq_Filtered.vcf.gz
+	vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029258.1 --recode --out data/Chr03_DNAseq_Filtered.vcf.gz
+	vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029259.1 --recode --out data/Chr04_DNAseq_Filtered.vcf.gz
+	vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029260.1 --recode --out data/Chr05_DNAseq_Filtered.vcf.gz
+	vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029261.1 --recode --out data/Chr06_DNAseq_Filtered.vcf.gz
+	vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029262.1 --recode --out data/Chr07_DNAseq_Filtered.vcf.gz
+	vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029263.1 --recode --out data/Chr08_DNAseq_Filtered.vcf.gz
+	vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029264.1 --recode --out data/Chr09_DNAseq_Filtered.vcf.gz
+	vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029265.1 --recode --out data/Chr10_DNAseq_Filtered.vcf.gz
+	vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029266.1 --recode --out data/Chr11_DNAseq_Filtered.vcf.gz
+	vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029267.1 --recode --out data/Chr12_DNAseq_Filtered.vcf.gz
+
+	#Use python script to produce an allelic frequency plot
+	python vcf2allPropAndCovByChr.py --conf config/Rice.conf --origin config/RiceOrgin.tab --acc D2_F2_tt --ploidy 2 --dcurve y --col /config/Color.conf --NoMiss --all y 
+	python vcf2allPropAndCovByChr.py --conf config/Rice.conf --origin config/RiceOrigin.tab --acc ES_430,ET_385 --ploidy 2 --NoMiss --all y
+
+
+	#Allelic Frequency Plot (Tolerant Pool ET_385)
+
+.. image:: ../images/ET_385Ratio.png
+
+HIGH IMPACT VARIANTS in QTL Region
+==================================
+
+.. code:: shell 
+	
+	Download:
+	SNPEff.latest
+	https://pcingola.github.io/SnpEff/download/
+
+	cd snpEff
+
+	cat freebayes~bwa~GCF_001433935.1_IRGSP-1.0~all_samples~filtered-strict~snpEff.vcf | scripts/vcfAnnFirst.py | java -jar SnpSift.jar extractFields - CHROM POS ID REF ALT QUAL FILTER "ANN[*].IMPACT" FORMAT ES_430 ET_385 > impact.tsv
+
+	#Import Data into R
+
+	All_HIGH_IMPACT <- impact %>% dplyr::filter(ANN....IMPACT == "HIGH")
+	df_filt <- All_HIGH_IMPACT  %>% dplyr::filter(CHROM=="NC_029263.1")
+	#QTL 1 Region on Chromosome 8 from QTL.csv file
+	df_filt <- df_filt %>% dplyr::filter(POS >= 17944918 & POS <= 25698533)
+	write.csv(All_HIGH_IMPACT,file="All_High_Impact.",sep = "/t")
+	write.table(All_HIGH_IMPACT,file = "All_High_Impact.txt",col.names = FALSE)
+
+	#We know from QTL.csv Chromosome 6 "NC_029263.1" has a QTL peak in the range of positions 17944918 - 25698533!
+	#Filter original SNP set to include this range of positions
+
+	df_filt3 <- df_filt %>% dplyr::filter(CHROM=="NC_029263.1")
+   
+	#QTL1 Region
+        df_filt4 <- df_filt3 %>% dplyr::filter(POS >= 17944918 & POS <= 25698533)
+	#Significant SNP
+	df_filt4 <- df_filt4 %>% dplyr::filter(pvalue < .05)
+	#Write a text file
+	write.table(df_filt4, file = "POSQTL1.txt",col.names = FALSE)
+
+	#Use MatchList.py script to find Variants that are
+	nano MatchList.py 
+	#Make sure file names match what you wrote
+	
+
+	#R Script
+	#df1 <- data.frame(POS1=c(123,457,666,789))
+	#df2 <- data.frame(POS2=c(123,444,566,789))
+	#write.table(df1,file="Variant1.txt",col.names = FALSE,row.names = FALSE)
+	#write.table(df2,file="Variant2.txt",col.names = FALSE,row.names = FALSE)
+	import pandas as pd
+	with open("POSQTL1.txt") as file:
+        list1 = []
+        for line in file:
+        list1.append(line.strip())
+        #print(list1)
+	with open("HighImpactQTL1.txt") as file:
+        list2 = []
+        for line in file:
+        list2.append(line.strip())
+        #print(list2)
+	found = []
+	for i in list1:
+        for j in list2:
+        if j in i:
+            found.append(j)
+	#print(found)
+	#print(type(found))
+	found=','.join(found)
+	#print(found)
+	#print(type(found))
+	df = pd.DataFrame([x.split(',') for x in found.split('/n')])
+	#print(df.transpose())
+	#print(df)
+	#print(type(df))
+	dfT = df.T
+	df9=dfT.drop_duplicates()
+	print(df9)
+	#print(df9['[0]'])
+
+	#Upload the document into R and filter results in decending order as seen in *orderedVariants.txt"
+
+
+

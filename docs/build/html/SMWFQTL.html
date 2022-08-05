@@ -86,6 +86,8 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">A PBGL Snakemake Workflow and Quatitative Trait Locus on Bulk Segregant Analysis</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#software-prerequisites">Software Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#painting-the-chromosomes-green">Painting The Chromosomes Green</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#high-impact-variants-in-qtl-region">HIGH IMPACT VARIANTS in QTL Region</a></li>
 </ul>
 </li>
 </ul>
@@ -325,11 +327,119 @@ df_filt4 &lt;- df_filt3 %&gt;% dplyr::filter<span class="o">(</span>pvalue &lt; 
 write.csv<span class="o">(</span>df_filt3,file <span class="o">=</span> <span class="s2">&quot;QTL.csv&quot;</span>,sep<span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<img alt="_images/pvalue.png" src="_images/pvalue.png" />
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>bash IGV.sh
 </pre></div>
 </div>
 <a class="reference external image-reference" href="../images/IGV.png"><img alt="Integrated Genomic Viewer" src="_images/IGV.png" /></a>
+</section>
+<section id="painting-the-chromosomes-green">
+<h2>Painting The Chromosomes Green</h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone VCF Hunter from github</span>
+git clone https://github.com/SouthGreenPlatform/VcfHunter.git
+<span class="nb">cd</span> VcfHunter
+
+<span class="c1"># Use vcf from Snakemake workflow as in input file to Filter it according to python script vcfFilter.1.0.py</span>
+python vcfFilter.1.0.py --vcf freebayes~bwa~GCF_001433935.1_IRGSP-1.0~all_samples~filtered-strict~snpEff.vcf.gz --names Oryza_Satvia_Snakemake/PaintTheChromosomes/all_names.tab  --MinCov <span class="m">10</span> --MaxCov <span class="m">300</span> --MinAl <span class="m">3</span> --nMiss <span class="m">1</span> --RmAlAlt <span class="m">1</span>:3:4:5:6 --prefix DNAseq_Filtered -g y
+
+<span class="c1">#Use vcftools to split vcf into independent vcf files per chromosome</span>
+vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029256.1 --recode --out data/Chr01_DNAseq_Filtered.vcf.gz
+vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029256.1 --recode --out data/Chr01_DNAseq_Filtered.vcf.gz
+vcftools --gzvcf Downloads/VcfHunter/bin/DNAseq_Filtered_filt.vcf.gz --chr NC_029257.1 --recode --out data/Chr02_DNAseq_Filtered.vcf.gz
+vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029258.1 --recode --out data/Chr03_DNAseq_Filtered.vcf.gz
+vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029259.1 --recode --out data/Chr04_DNAseq_Filtered.vcf.gz
+vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029260.1 --recode --out data/Chr05_DNAseq_Filtered.vcf.gz
+vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029261.1 --recode --out data/Chr06_DNAseq_Filtered.vcf.gz
+vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029262.1 --recode --out data/Chr07_DNAseq_Filtered.vcf.gz
+vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029263.1 --recode --out data/Chr08_DNAseq_Filtered.vcf.gz
+vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029264.1 --recode --out data/Chr09_DNAseq_Filtered.vcf.gz
+vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029265.1 --recode --out data/Chr10_DNAseq_Filtered.vcf.gz
+vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029266.1 --recode --out data/Chr11_DNAseq_Filtered.vcf.gz
+vcftools --gzvcf DNAseq_Filtered_filt.vcf.gz --chr NC_029267.1 --recode --out data/Chr12_DNAseq_Filtered.vcf.gz
+
+<span class="c1">#Use python script to produce an allelic frequency plot</span>
+python vcf2allPropAndCovByChr.py --conf config/Rice.conf --origin config/RiceOrgin.tab --acc D2_F2_tt --ploidy <span class="m">2</span> --dcurve y --col /config/Color.conf --NoMiss --all y
+python vcf2allPropAndCovByChr.py --conf config/Rice.conf --origin config/RiceOrigin.tab --acc ES_430,ET_385 --ploidy <span class="m">2</span> --NoMiss --all y
+
+
+<span class="c1">#Allelic Frequency Plot (Tolerant Pool ET_385)</span>
+</pre></div>
+</div>
+<img alt="_images/ET_385Ratio.png" src="_images/ET_385Ratio.png" />
+</section>
+<section id="high-impact-variants-in-qtl-region">
+<h2>HIGH IMPACT VARIANTS in QTL Region</h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Download:
+SNPEff.latest
+https://pcingola.github.io/SnpEff/download/
+
+<span class="nb">cd</span> snpEff
+
+cat freebayes~bwa~GCF_001433935.1_IRGSP-1.0~all_samples~filtered-strict~snpEff.vcf <span class="p">|</span> scripts/vcfAnnFirst.py <span class="p">|</span> java -jar SnpSift.jar extractFields - CHROM POS ID REF ALT QUAL FILTER <span class="s2">&quot;ANN[*].IMPACT&quot;</span> FORMAT ES_430 ET_385 &gt; impact.tsv
+
+<span class="c1">#Import Data into R</span>
+
+All_HIGH_IMPACT &lt;- impact %&gt;% dplyr::filter<span class="o">(</span>ANN....IMPACT <span class="o">==</span> <span class="s2">&quot;HIGH&quot;</span><span class="o">)</span>
+df_filt &lt;- All_HIGH_IMPACT  %&gt;% dplyr::filter<span class="o">(</span><span class="nv">CHROM</span><span class="o">==</span><span class="s2">&quot;NC_029263.1&quot;</span><span class="o">)</span>
+<span class="c1">#QTL 1 Region on Chromosome 8 from QTL.csv file</span>
+df_filt &lt;- df_filt %&gt;% dplyr::filter<span class="o">(</span>POS &gt;<span class="o">=</span> <span class="m">17944918</span> <span class="p">&amp;</span> POS &lt;<span class="o">=</span> <span class="m">25698533</span><span class="o">)</span>
+write.csv<span class="o">(</span>All_HIGH_IMPACT,file<span class="o">=</span><span class="s2">&quot;All_High_Impact.&quot;</span>,sep <span class="o">=</span> <span class="s2">&quot;/t&quot;</span><span class="o">)</span>
+write.table<span class="o">(</span>All_HIGH_IMPACT,file <span class="o">=</span> <span class="s2">&quot;All_High_Impact.txt&quot;</span>,col.names <span class="o">=</span> FALSE<span class="o">)</span>
+
+<span class="c1">#We know from QTL.csv Chromosome 6 &quot;NC_029263.1&quot; has a QTL peak in the range of positions 17944918 - 25698533!</span>
+<span class="c1">#Filter original SNP set to include this range of positions</span>
+
+df_filt3 &lt;- df_filt %&gt;% dplyr::filter<span class="o">(</span><span class="nv">CHROM</span><span class="o">==</span><span class="s2">&quot;NC_029263.1&quot;</span><span class="o">)</span>
+
+<span class="c1">#QTL1 Region</span>
+df_filt4 &lt;- df_filt3 %&gt;% dplyr::filter<span class="o">(</span>POS &gt;<span class="o">=</span> <span class="m">17944918</span> <span class="p">&amp;</span> POS &lt;<span class="o">=</span> <span class="m">25698533</span><span class="o">)</span>
+<span class="c1">#Significant SNP</span>
+df_filt4 &lt;- df_filt4 %&gt;% dplyr::filter<span class="o">(</span>pvalue &lt; .05<span class="o">)</span>
+<span class="c1">#Write a text file</span>
+write.table<span class="o">(</span>df_filt4, <span class="nv">file</span> <span class="o">=</span> <span class="s2">&quot;POSQTL1.txt&quot;</span>,col.names <span class="o">=</span> FALSE<span class="o">)</span>
+
+<span class="c1">#Use MatchList.py script to find Variants that are</span>
+nano MatchList.py
+<span class="c1">#Make sure file names match what you wrote</span>
+
+
+<span class="c1">#R Script</span>
+<span class="c1">#df1 &lt;- data.frame(POS1=c(123,457,666,789))</span>
+<span class="c1">#df2 &lt;- data.frame(POS2=c(123,444,566,789))</span>
+<span class="c1">#write.table(df1,file=&quot;Variant1.txt&quot;,col.names = FALSE,row.names = FALSE)</span>
+<span class="c1">#write.table(df2,file=&quot;Variant2.txt&quot;,col.names = FALSE,row.names = FALSE)</span>
+import pandas as pd
+with open<span class="o">(</span><span class="s2">&quot;POSQTL1.txt&quot;</span><span class="o">)</span> as file:
+<span class="nv">list1</span> <span class="o">=</span> <span class="o">[]</span>
+<span class="k">for</span> line <span class="k">in</span> file:
+list1.append<span class="o">(</span>line.strip<span class="o">())</span>
+<span class="c1">#print(list1)</span>
+with open<span class="o">(</span><span class="s2">&quot;HighImpactQTL1.txt&quot;</span><span class="o">)</span> as file:
+<span class="nv">list2</span> <span class="o">=</span> <span class="o">[]</span>
+<span class="k">for</span> line <span class="k">in</span> file:
+list2.append<span class="o">(</span>line.strip<span class="o">())</span>
+<span class="c1">#print(list2)</span>
+<span class="nv">found</span> <span class="o">=</span> <span class="o">[]</span>
+<span class="k">for</span> i <span class="k">in</span> list1:
+<span class="k">for</span> j <span class="k">in</span> list2:
+<span class="k">if</span> j <span class="k">in</span> i:
+    found.append<span class="o">(</span>j<span class="o">)</span>
+<span class="c1">#print(found)</span>
+<span class="c1">#print(type(found))</span>
+<span class="nv">found</span><span class="o">=</span><span class="s1">&#39;,&#39;</span>.join<span class="o">(</span>found<span class="o">)</span>
+<span class="c1">#print(found)</span>
+<span class="c1">#print(type(found))</span>
+<span class="nv">df</span> <span class="o">=</span> pd.DataFrame<span class="o">([</span>x.split<span class="o">(</span><span class="s1">&#39;,&#39;</span><span class="o">)</span> <span class="k">for</span> x <span class="k">in</span> found.split<span class="o">(</span><span class="s1">&#39;/n&#39;</span><span class="o">)])</span>
+<span class="c1">#print(df.transpose())</span>
+<span class="c1">#print(df)</span>
+<span class="c1">#print(type(df))</span>
+<span class="nv">dfT</span> <span class="o">=</span> df.T
+<span class="nv">df9</span><span class="o">=</span>dfT.drop_duplicates<span class="o">()</span>
+print<span class="o">(</span>df9<span class="o">)</span>
+<span class="c1">#print(df9[&#39;[0]&#39;])</span>
+
+<span class="c1">#Upload the document into R and filter results in decending order as seen in *orderedVariants.txt&quot;</span>
+</pre></div>
+</div>
 </section>
 </section>
 
