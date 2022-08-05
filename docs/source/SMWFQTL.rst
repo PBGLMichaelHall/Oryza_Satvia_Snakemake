@@ -261,23 +261,24 @@ HIGH IMPACT VARIANTS in QTL Region
 	#Import Data into R
 
 	All_HIGH_IMPACT <- impact %>% dplyr::filter(ANN....IMPACT == "HIGH")
-	df_filt <- All_HIGH_IMPACT  %>% dplyr::filter(CHROM=="NC_029263.1")
+	df_filt2 <- All_HIGH_IMPACT  %>% dplyr::filter(CHROM=="NC_029263.1")
 	#QTL 1 Region on Chromosome 8 from QTL.csv file
-	df_filt <- df_filt %>% dplyr::filter(POS >= 17944918 & POS <= 25698533)
-	write.csv(All_HIGH_IMPACT,file="All_High_Impact.",sep = "/t")
-	write.table(All_HIGH_IMPACT,file = "All_High_Impact.txt",col.names = FALSE)
+	df_filt2 <- df_filt2 %>% dplyr::filter(POS >= 17944918 & POS <= 25698533)
+	df_filt2 <- df_filt2 %>% dplyr::select(POS)
+	write.table(df_filt2,file="All_High_Impact.txt",row.names=FALSE,col.names=FALSE)
+	
 
 	#We know from QTL.csv Chromosome 6 "NC_029263.1" has a QTL peak in the range of positions 17944918 - 25698533!
-	#Filter original SNP set to include this range of positions
+	#Filter original SNP set to include this range of positions on Chromosome 8
 
-	df_filt3 <- df_filt %>% dplyr::filter(CHROM=="NC_029263.1")
+	df_filt <- df_filt %>% dplyr::filter(CHROM=="NC_029263.1")
    
 	#QTL1 Region
-        df_filt4 <- df_filt3 %>% dplyr::filter(POS >= 17944918 & POS <= 25698533)
+        df_filt <- df_filt %>% dplyr::filter(POS >= 17944918 & POS <= 25698533)
 	#Significant SNP
-	df_filt4 <- df_filt4 %>% dplyr::filter(pvalue < .05)
+	df_filt <- df_filt %>% dplyr::filter(pvalue < .05)
 	#Write a text file
-	write.table(df_filt4, file = "POSQTL1.txt",col.names = FALSE)
+	write.table(df_filt, file = "POSQTL1.txt",col.names = FALSE)
 
 	#Use MatchList.py script to find Variants that are
 	nano MatchList.py 
@@ -295,7 +296,7 @@ HIGH IMPACT VARIANTS in QTL Region
         for line in file:
         list1.append(line.strip())
         #print(list1)
-	with open("HighImpactQTL1.txt") as file:
+	with open("All_High_Impact.txt") as file:
         list2 = []
         for line in file:
         list2.append(line.strip())
@@ -319,7 +320,28 @@ HIGH IMPACT VARIANTS in QTL Region
 	print(df9)
 	#print(df9['[0]'])
 
-	#Upload the document into R and filter results in decending order as seen in *orderedVariants.txt"
+        python MatchList.py
+	
+	18398803
+   	18519533
+   	18593921
+   	19148067
+   	19715648
+   	21045530
+   	21093745
+   	22286217
+   	22636828
+   	23063312
+  	23591197
+  	24582019
+  	24753987
+  	24772963
+  	24775242
+  	24775287
+  	24785765
+  	24854393
+	
+	
 
 
 ====================
