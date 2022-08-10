@@ -1,0 +1,3 @@
+run,library,sample,fq1,fq2,il_fq,cohort,platform,include
+run2022,ET_385,ET_385,/home/michael/dna-proto-workflow/FASTQ/ET_385_1.fq.gz,/home/michael/dna-proto-workflow/FASTQ/ET_385_2.fq.gz,,CBC,ILLUMINA,Y
+run2022,ES_430,ES_430,/home/michael/dna-proto-workflow/FASTQ/ES_430_1.fq.gz,/home/michael/dna-proto-workflow/FASTQ/ES_430_2.fq.gz,,CBC,ILLUMINA,Y
