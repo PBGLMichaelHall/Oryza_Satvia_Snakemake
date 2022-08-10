@@ -85,9 +85,8 @@ Software Prerequisites
 .. _a link: https://raw.githubusercontent.com/PBGLMichaelHall/Oryza_Satvia_Snakemake/main/dag.svg
 
 
-.. image:: ../images/new.png
-
-.. _a link: https://htmlpreview.github.io/?https://github.com/PBGLMichaelHall/Oryza_Satvia_Snakemake/blob/main/freebayes%7Ebwa%7EGCF_001433935.1_IRGSP-1.0%7Eall_samples%7Efiltered-strict.html
+.. raw:: html
+   :file: https://htmlpreview.github.io/?https://github.com/PBGLMichaelHall/Oryza_Satvia_Snakemake/blob/main/freebayes%7Ebwa%7EGCF_001433935.1_IRGSP-1.0%7Eall_samples%7Efiltered-strict.html
 
 .. code:: shell
 
