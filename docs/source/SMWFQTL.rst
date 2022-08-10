@@ -80,6 +80,8 @@ Software Prerequisites
    :alt: Directed Acrylic Graph
    :scale: 250 %
 
+.. _a link: https://github.com/PBGLMichaelHall/Oryza_Satvia_Snakemake/blob/main/freebayes%7Ebwa%7EGCF_001433935.1_IRGSP-1.0%7Eall_samples%7Efiltered-strict.html
+
 .. _a link: https://raw.githubusercontent.com/PBGLMichaelHall/Oryza_Satvia_Snakemake/main/dag.svg
 
 .. code:: shell
